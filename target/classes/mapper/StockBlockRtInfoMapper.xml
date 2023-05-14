@@ -28,6 +28,20 @@
         from stock_block_rt_info
         where  id = #{id,jdbcType=VARCHAR} 
     </select>
+    <select id="sectorAllLimit" resultType="com.scy.stock.pojo.StockBlockRtInfo">
+        select
+            sbr.company_num  as companyNum,
+            sbr.trade_amount as tradeAmount,
+            sbr.label        as  label,
+            sbr.avg_price    as avgPrice,
+            sbr.block_name   as blockName,
+            date_format(sbr.cur_time,'%Y%m%d') as curTime,
+            sbr.trade_volume as tradeVolume,
+            sbr.updown_rate  as updownRate
+        from stock_block_rt_info as sbr
+        order by sbr.cur_time desc,sbr.trade_volume desc
+            limit 10
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from stock_block_rt_info

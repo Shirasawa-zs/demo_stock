@@ -1,6 +1,9 @@
 package com.scy.stock.mapper;
 
 import com.scy.stock.pojo.StockBlockRtInfo;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
 * @author Jack
@@ -8,6 +11,7 @@ import com.scy.stock.pojo.StockBlockRtInfo;
 * @createDate 2023-05-04 20:14:15
 * @Entity com.scy.stock.pojo.StockBlockRtInfo
 */
+@Mapper
 public interface StockBlockRtInfoMapper {
 
     int deleteByPrimaryKey(Long id);
@@ -22,4 +26,5 @@ public interface StockBlockRtInfoMapper {
 
     int updateByPrimaryKey(StockBlockRtInfo record);
 
+    List<StockBlockRtInfo> sectorAllLimit();
 }
