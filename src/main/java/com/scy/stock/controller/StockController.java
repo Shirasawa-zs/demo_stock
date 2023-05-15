@@ -1,6 +1,7 @@
 package com.scy.stock.controller;
 
 import com.scy.stock.domain.InnerMarketDomain;
+import com.scy.stock.domain.StockBlockRtInfoDomain;
 import com.scy.stock.mapper.StockRtInfoMapper;
 import com.scy.stock.pojo.StockBlockRtInfo;
 import com.scy.stock.pojo.StockBusiness;
@@ -42,7 +43,7 @@ public class StockController {
      * @return
      */
     @GetMapping("/sector/all")
-    public R<List<StockBlockRtInfo>> sectorAll(){
+    public R<List<StockBlockRtInfoDomain>> sectorAll(){
         return stockService.sectorAllLimit();
     }
 }

@@ -1,5 +1,6 @@
 package com.scy.stock.mapper;
 
+import com.scy.stock.domain.StockBlockRtInfoDomain;
 import com.scy.stock.pojo.StockBlockRtInfo;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -26,5 +27,5 @@ public interface StockBlockRtInfoMapper {
 
     int updateByPrimaryKey(StockBlockRtInfo record);
 
-    List<StockBlockRtInfo> sectorAllLimit();
+    List<StockBlockRtInfoDomain> sectorAllLimit();
 }

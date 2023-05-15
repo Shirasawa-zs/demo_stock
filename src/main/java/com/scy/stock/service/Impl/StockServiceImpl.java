@@ -2,6 +2,7 @@ package com.scy.stock.service.Impl;
 
 import com.scy.stock.common.StockInfoConfig;
 import com.scy.stock.domain.InnerMarketDomain;
+import com.scy.stock.domain.StockBlockRtInfoDomain;
 import com.scy.stock.mapper.StockBlockRtInfoMapper;
 import com.scy.stock.mapper.StockBusinessMapper;
 import com.scy.stock.mapper.StockMarketIndexInfoMapper;
@@ -59,10 +60,10 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public R<List<StockBlockRtInfo>> sectorAllLimit() {
+    public R<List<StockBlockRtInfoDomain>> sectorAllLimit() {
         //1.调用mapper接口获取数据
         // TODO 优化 避免全表查询 根据时间范围查询，提高查询效率
-        List<StockBlockRtInfo> infos = stockBlockRtInfoMapper.sectorAllLimit();
+        List<StockBlockRtInfoDomain> infos = stockBlockRtInfoMapper.sectorAllLimit();
         //2.组装数据
         if (CollectionUtils.isEmpty(infos)) {
             return R.error(ResponseCode.NO_RESPONSE_DATA.getMessage());
