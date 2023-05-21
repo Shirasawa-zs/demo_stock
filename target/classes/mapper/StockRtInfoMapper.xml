@@ -32,6 +32,60 @@
         where  id = #{id,jdbcType=VARCHAR} 
     </select>
 
+    <select id="stockIncreaseLimit" resultType="com.scy.stock.domain.StockUpdownDomain">
+        select
+            trade_amount as tradeAmt,
+            pre_close_price as preClosePrice,
+            (max_price-min_price)/pre_close_price as amplitude,
+            stock_code as code,
+            stock_name as name,
+            date_format(cur_time,'%Y%m%d') as curDate,
+            trade_volume as tradeVol,
+            cur_price-pre_close_price as increase,
+            (cur_price-pre_close_price)/pre_close_price as upDown,
+            cur_price as tradePrice
+        from stock_rt_info
+        where cur_time=#{curTime}
+        order by  upDown desc limit 10
+    </select>
+    <select id="stockAll" resultType="com.scy.stock.domain.StockUpdownDomain">
+        select
+            sri.trade_amount as tradeAmt,
+            sri.pre_close_price as preClosePrice,
+            (sri.max_price-sri.min_price)/sri.pre_close_price as amplitude,
+            sri.stock_code as code,
+            sri.stock_name as name,
+            date_format(sri.cur_time,'%Y%m%d') as curDate,
+            sri.trade_volume as tradeVol,
+            sri.cur_price-sri.pre_close_price as increase,
+            (sri.cur_price-sri.pre_close_price)/sri.pre_close_price as upDown,
+            sri.cur_price as tradePrice
+        from stock_rt_info as sri
+        order by sri.cur_time desc, upDown desc
+    </select>
+    <select id="upDownCount" resultType="java.util.Map">
+        select
+        tmp.time as time,
+        count(*) as count
+        from
+        (
+        select
+        date_format(sri.cur_time,'%Y%m%d%H%i') as time,
+        (sri.cur_price-sri.pre_close_price)/sri.pre_close_price as upDown
+        from stock_rt_info as sri
+        where sri.cur_time between #{openDate} and #{avlDate} having
+        <if test="flag==1">
+            upDown >=0.1
+        </if>
+        <if test="flag==0">
+            upDown &lt;=-0.1
+        </if>
+        ) as
+        tmp
+        group by tmp.time
+        order by tmp.time asc
+    </select>
+
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from stock_rt_info
         where  id = #{id,jdbcType=VARCHAR} 

@@ -69,7 +69,6 @@ pagehelper:
   params: pacount=countSql # POJO或者Map中发现了countSql属性，就会作为count参数使用
   returnPageInfo: check # always总是返回PageInfo类型,check检查返回类型是否为PageInfo,none返回Page
 
-
 stock:
   inner: # A股
     - s_sh000001 # 上证ID
