@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author Jack
@@ -38,5 +39,5 @@ public interface StockMarketIndexInfoMapper {
      */
     List<InnerMarketDomain> selectByIdsAndDate(@Param("ids") List<String> Ids, @Param("lastDate") Date lDate);
 
-    List<StockBlockRtInfo> sectorAllLimit();
+    List<Map> stockTradeVolCount(@Param("marketIds") List<String> inner, @Param("curDate") Date curDate, @Param("openDate") Date openDate);
 }

@@ -5,10 +5,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.gson.Gson;
 import com.scy.stock.common.StockInfoConfig;
-import com.scy.stock.domain.InnerMarketDomain;
-import com.scy.stock.domain.StockBlockRtInfoDomain;
-import com.scy.stock.domain.StockExcelDomain;
-import com.scy.stock.domain.StockUpdownDomain;
+import com.scy.stock.domain.*;
 import com.scy.stock.mapper.StockBlockRtInfoMapper;
 import com.scy.stock.mapper.StockBusinessMapper;
 import com.scy.stock.mapper.StockMarketIndexInfoMapper;
@@ -30,12 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service("stockService")
@@ -173,5 +168,125 @@ public class StockServiceImpl implements StockService {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    public R<Map> stockTradeVol4InnerMarket() {
+        //1.处理相关数据
+        //获取当前T日最近有效时间
+        DateTime curDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        //获取T日开盘时间
+        DateTime openDateTime = DateTimeUtil.getOpenDate(curDateTime);
+        //转化为Date类型
+        Date curDate = curDateTime.toDate();
+        Date openDate = openDateTime.toDate();
+        // TODO mock数据模拟
+        String tDateStr = "20220103143000";
+        curDate = DateTime.parse(tDateStr, DateTimeFormat.forPattern("yyyyMMddHHmmss")).toDate();
+        String openDateStr="20220103093000";
+        openDate = DateTime.parse(openDateStr, DateTimeFormat.forPattern("yyyyMMddHHmmss")).toDate();
+        //T-1交易日的处理，类似
+        DateTime preDateTime = DateTimeUtil.getPreDateTime(curDateTime);
+        DateTime preOpenDateTime = DateTimeUtil.getOpenDate(preDateTime);
+        Date preDate = preDateTime.toDate();
+        Date preOpenDate = preOpenDateTime.toDate();
+        //TODO 后续注释掉 mock-data
+        String preTStr="20220102143000";
+        preDate = DateTime.parse(preTStr, DateTimeFormat.forPattern("yyyyMMddHHmmss")).toDate();
+        //mock-data
+        String openDateStr2="20220102093000";
+        preOpenDate = DateTime.parse(openDateStr2, DateTimeFormat.forPattern("yyyyMMddHHmmss")).toDate();
+        //2.获取T日的股票大盘交易量统计数据
+        List<Map> stockMarkedIndexInfoListForCurTime = stockMarketIndexInfoMapper.stockTradeVolCount(stockInfoConfig.getInner(), curDate, openDate);
+        List<Map> stockMarkedIndexInfoListForPreTime = stockMarketIndexInfoMapper.stockTradeVolCount(stockInfoConfig.getInner(), preDate, preOpenDate);
+        HashMap<String, List<Map>> data = new HashMap<>();
+        data.put("volList", stockMarkedIndexInfoListForCurTime);
+        data.put("yesVolList",stockMarkedIndexInfoListForPreTime);
+        return R.ok(data);
+    }
+
+    @Override
+    public R<Map> stockUpDownScopeCount() {
+        //1.获取当前时间下最近的一个股票交易时间 精确到秒
+        DateTime avlDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        Date avlDate = avlDateTime.toDate();
+        //TODO 后续删除 mock-data
+        String  mockDate="20220106095500";
+        avlDate = DateTime.parse(mockDate, DateTimeFormat.forPattern("yyyyMMddHHmmss")).toDate();
+        //2.查询
+        List<Map> maps = null;
+        //获取股票涨幅区间集合
+        List<String> upDownRange = null;
+        //将List集合下的字符串映射成Map对象
+        maps = stockRtInfoMapper.stockUpDownScopeCount(avlDate);
+        //获取去股票涨幅区间的集合
+        upDownRange = stockInfoConfig.getUpDownRange();
+        //将list集合下的字符串映射成Map对象
+        List<Map> finalMaps = maps;
+        List<Map> orderMap = upDownRange.stream().map(key -> {
+            Optional<Map> title = finalMaps.stream().filter(map -> key.equals(map.get("title"))).findFirst();
+            //判断对应的map是否存在
+            Map tmp = null;
+            if (title.isPresent()) {
+                tmp = title.get();
+            } else {
+                tmp = new HashMap();
+                tmp.put("title", key);
+                tmp.put("count", 0);
+            }
+            return tmp;
+        }).collect(Collectors.toList());
+        //3.组装data
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("time",avlDateTime.toString("yyyy-MM-dd HH:mm:ss"));
+        data.put("infos",orderMap);
+        //返回响应数据
+        return R.ok(data);
+    }
+
+    @Override
+    public R<List<Stock4MinuteDomain>> stockScreenTimeSharing(String code) {
+        //1.获取最近有效的股票交易时间
+        DateTime curDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        //获取当前日期
+        Date curDate = curDateTime.toDate();
+        //获取当前日期对应的开盘日期
+        Date openDate = DateTimeUtil.getOpenDate(curDateTime).toDate();
+        //TODO 后续删除 mock-data
+        String mockDate="20220106142500";
+        curDate=DateTime.parse(mockDate, DateTimeFormat.forPattern("yyyyMMddHHmmss")).toDate();
+        String openDateStr="20220106093000";
+        openDate=DateTime.parse(openDateStr, DateTimeFormat.forPattern("yyyyMMddHHmmss")).toDate();
+        List<Stock4MinuteDomain> maps= stockRtInfoMapper.stockScreenTimeSharing(code,openDate,curDate);
+        //响应前端
+        return R.ok(maps);
+    }
+
+    /**
+     * 功能描述：单个个股日K数据查询 ，可以根据时间区间查询数日的K线数据
+     * 		默认查询历史20天的数据；
+     * @param code 股票编码
+     * @return
+     */
+    @Override
+    public R<List<Stock4EvrDayDomain>> stockCreenDkLine(String code) {
+        //获取当前日期前推20天
+        DateTime curDateTime = DateTimeUtil.getLastDate4Stock(DateTime.now());
+        //当前时间节点
+        Date curTime = curDateTime.toDate();
+        //前推20
+        Date pre20Day = curDateTime.minusDays(20).toDate();
+
+        //TODO 后续删除
+        String avlDate="20220106142500";
+        curTime=DateTime.parse(avlDate, DateTimeFormat.forPattern("yyyyMMddHHmmss")).toDate();
+        String openDate="20220101093000";
+        pre20Day=DateTime.parse(openDate, DateTimeFormat.forPattern("yyyyMMddHHmmss")).toDate();
+        // List<Stock4EvrDayDomain> infos = stockRtInfoMapper.stockCreenDkLine(code, pre20Day, curTime);
+        //获取指定范围的收盘日期集合
+        List<Date> closeDates=stockRtInfoMapper.getCloseDates(code,pre20Day,curTime);
+        //根据收盘日期精准查询，如果不在收盘日期，则查询最新数据
+        List<Stock4EvrDayDomain> infos= stockRtInfoMapper.getStockCreenDkLineData(code,closeDates);
+        return R.ok(infos);
     }
 }

@@ -51,6 +51,19 @@
         LEFT JOIN stock_market_log_price AS sml ON tmp.mark_Id=sml.market_code
         AND DATE_FORMAT( sml.cur_date, '%Y%m%d' )= DATE_FORMAT(#{lastDate},'%Y%m%d' )
     </select>
+    <select id="stockTradeVolCount" resultType="java.util.Map">
+        select
+            DATE_FORMAT(smi.cur_time,'%Y%m%d%H%i') as time,
+	        sum(smi.trade_volume) as count
+        from stock_market_index_info as smi
+        where
+            cur_time BETWEEN #{openDate} AND #{curDate}
+          and mark_Id in
+        <foreach collection="marketIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        GROUP BY time
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from stock_market_index_info

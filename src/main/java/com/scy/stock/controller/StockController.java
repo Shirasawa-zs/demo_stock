@@ -1,19 +1,12 @@
 package com.scy.stock.controller;
 
-import com.scy.stock.domain.InnerMarketDomain;
-import com.scy.stock.domain.StockBlockRtInfoDomain;
-import com.scy.stock.domain.StockUpdownDomain;
-import com.scy.stock.mapper.StockRtInfoMapper;
-import com.scy.stock.pojo.StockBlockRtInfo;
+import com.scy.stock.domain.*;
 import com.scy.stock.pojo.StockBusiness;
 import com.scy.stock.service.StockService;
 import com.scy.stock.utils.PageResult;
 import com.scy.stock.vo.resp.R;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
@@ -88,10 +81,53 @@ public class StockController {
 
 
     /**
-     * @param
+     * 导出Excel文件给前端
+     * @param response 返回响应
+     * @param page 当前页
+     * @param pageSize 当前页大小
      */
     @GetMapping("/stock/export")
     public void stockExport(HttpServletResponse response, Integer page, Integer pageSize) throws UnsupportedEncodingException {
         stockService.stockExport(response,page,pageSize);
+    }
+
+    /**
+     * 查询指定大盘下的指定日期下小于等于指定时间的数据，结果包含：每分钟内，整体大盘的交易量的统计
+     * @return
+     */
+    @GetMapping("/stock/tradevol")
+    public R<Map> stockTradeVol4InnerMarket(){
+        return stockService.stockTradeVol4InnerMarket();
+    }
+
+    /**
+     * 查询当前时间下股票的涨跌幅度区间统计功能
+     * 如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询点
+     * @return
+     */
+    @GetMapping("/stock/updown")
+    public R<Map> getStockUpDown(){
+        return stockService.stockUpDownScopeCount();
+    }
+
+    /**
+     * 功能描述：查询单个个股的分时行情数据，也就是统计指定股票T日每分钟的交易数据；
+     *         如果当前日期不在有效时间内，则以最近的一个股票交易时间作为查询时间点
+     * @param code 股票编码
+     * @return
+     */
+    @GetMapping("/stock/screen/time-sharing")
+    public R<List<Stock4MinuteDomain>> stockScreenTimeSharing(String code){
+        return stockService.stockScreenTimeSharing(code);
+    }
+
+    /**
+     * 单个个股日K 数据查询 ，可以根据时间区间查询数日的K线数据
+     * @param stockCode 股票编码
+     * @return
+     */
+    @RequestMapping("/stock/screen/dkline")
+    public R<List<Stock4EvrDayDomain>> getDayKLinData(@RequestParam("code") String stockCode){
+        return stockService.stockCreenDkLine(stockCode);
     }
 }

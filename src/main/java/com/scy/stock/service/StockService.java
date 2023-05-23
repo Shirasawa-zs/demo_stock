@@ -1,8 +1,6 @@
 package com.scy.stock.service;
 
-import com.scy.stock.domain.InnerMarketDomain;
-import com.scy.stock.domain.StockBlockRtInfoDomain;
-import com.scy.stock.domain.StockUpdownDomain;
+import com.scy.stock.domain.*;
 import com.scy.stock.pojo.StockBlockRtInfo;
 import com.scy.stock.pojo.StockBusiness;
 import com.scy.stock.utils.PageResult;
@@ -36,7 +34,7 @@ public interface StockService {
     R<List<StockUpdownDomain>> stockIncreaseLimit();
 
     /**
-     * 沪深两市个股行情列表查询 ,以时间顺序和涨幅分页查询
+     * 查询指定大盘下的指定日期下小于等于指定时间的数据，结果包含：每分钟内，整体大盘的交易量的统计
      * @param page 当前页
      * @param pageSize 每页大小
      * @return
@@ -46,4 +44,12 @@ public interface StockService {
     R<Map> upDownCount();
 
     void stockExport(HttpServletResponse response, Integer page, Integer pageSize) throws UnsupportedEncodingException;
+
+    R<Map> stockTradeVol4InnerMarket();
+
+    R<Map> stockUpDownScopeCount();
+
+    R<List<Stock4MinuteDomain>> stockScreenTimeSharing(String code);
+
+    R<List<Stock4EvrDayDomain>> stockCreenDkLine(String code);
 }
