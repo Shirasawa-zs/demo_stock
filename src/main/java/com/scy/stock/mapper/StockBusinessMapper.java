@@ -28,4 +28,9 @@ public interface StockBusinessMapper {
 
     List<StockBusiness> getAll();
 
+    /**
+     * 获取所有股票的code
+     * @return
+     */
+    List<String> getStockIds();
 }

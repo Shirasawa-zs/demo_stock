@@ -40,4 +40,10 @@ public interface StockMarketIndexInfoMapper {
     List<InnerMarketDomain> selectByIdsAndDate(@Param("ids") List<String> Ids, @Param("lastDate") Date lDate);
 
     List<Map> stockTradeVolCount(@Param("marketIds") List<String> inner, @Param("curDate") Date curDate, @Param("openDate") Date openDate);
+
+    /**
+     * 批量插入股票大盘数据
+     * @param infos
+     */
+    int insertBatch(@Param("list") List<StockMarketIndexInfo> infos);
 }
